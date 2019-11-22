@@ -6,10 +6,14 @@ import io.kubernetes.client.models.V1Pod;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.joda.time.Minutes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class PodInfo {
+
+    private static final Logger logger = LoggerFactory.getLogger(PodInfo.class);
 
     private final V1Pod v1Pod;
 
@@ -34,6 +38,15 @@ public class PodInfo {
             return Minutes.minutesBetween(getStartTime(), Instant.now()).getMinutes();
         }
         return 0;
+    }
+
+    public int getRestartCount() {
+        try {
+            return v1Pod.getStatus().getContainerStatuses().get(0).getRestartCount();
+        } catch (Exception ex) {
+            logger.info("Can't get restart count", ex);
+            return 0;
+        }
     }
 
     public String getTenantName() {

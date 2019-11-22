@@ -1,20 +1,29 @@
 package ru.usharik.k8s.client.controller;
 
 import com.google.common.io.ByteStreams;
+import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.Configuration;
 import io.kubernetes.client.PodLogs;
+import io.kubernetes.client.apis.CoreV1Api;
+import io.kubernetes.client.util.Config;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.joda.time.DateTime;
@@ -30,11 +39,12 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-import static ru.usharik.k8s.client.Main.coreApi;
-
 public class PodsGridController implements Initializable {
 
     private static final Logger logger = LoggerFactory.getLogger(PodsGridController.class);
+
+    @FXML
+    public TextField serviceUrl;
 
     @FXML
     private TextField podNameFilter;
@@ -55,36 +65,58 @@ public class PodsGridController implements Initializable {
     private TableColumn<PodInfo, String> status;
 
     @FXML
+    public TableColumn<PodInfo, Integer> restartCount;
+
+    @FXML
     private TableColumn<PodInfo, DateTime> startTime;
 
     @FXML
     public TableColumn<PodInfo, Integer> minutesFromStart;
 
-    private FilteredList<PodInfo> podInfos;
+    private FilteredList<PodInfo> filteredPodList;
+
+    private ObservableList<PodInfo> observablePodList;
 
     private Stage stage;
 
     public void initialize(URL location, ResourceBundle resources) {
         name.setCellValueFactory(new PropertyValueFactory<>("name"));
         status.setCellValueFactory(new PropertyValueFactory<>("status"));
+        restartCount.setCellValueFactory(new PropertyValueFactory<>("restartCount"));
         startTime.setCellValueFactory(new PropertyValueFactory<>("startTime"));
         tenantName.setCellValueFactory(new PropertyValueFactory<>("tenantName"));
         minutesFromStart.setCellValueFactory(new PropertyValueFactory<>("minutesFromStart"));
 
-        podInfos = new FilteredList<>(FXCollections.observableArrayList(getPodsList()), p -> true);
-        SortedList<PodInfo> sortedList = new SortedList<>(this.podInfos);
+        observablePodList = FXCollections.observableArrayList(queryPodsList());
+        filteredPodList = new FilteredList<>(observablePodList, p -> true);
+        SortedList<PodInfo> sortedList = new SortedList<>(this.filteredPodList);
         sortedList.comparatorProperty().bind(tableView.comparatorProperty());
         tableView.setItems(sortedList);
     }
 
-    private List<PodInfo> getPodsList() {
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+
+    private List<PodInfo> queryPodsList() {
         try {
-            return coreApi
+            logger.info("Getting pods list from service {}", serviceUrl.getText());
+
+            ApiClient client = Config.fromUrl(serviceUrl.getText());
+            Configuration.setDefaultApiClient(client);
+            return new CoreV1Api(client)
                     .listNamespacedPod("default", "false", null, null, null, null, null, null, null)
                     .getItems().stream()
                     .map(PodInfo::new)
                     .collect(Collectors.toList());
         } catch (Exception ex) {
+            logger.error("", ex);
+
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setHeaderText("Can't update pods list");
+            errorAlert.setContentText(ex.getLocalizedMessage());
+            errorAlert.showAndWait();
+
             throw new IllegalStateException(ex);
         }
     }
@@ -93,7 +125,7 @@ public class PodsGridController implements Initializable {
         String podNamePattern = podNameFilter.getText();
         String tenantPattern = tenantNameFilter.getText();
 
-        podInfos.setPredicate(
+        filteredPodList.setPredicate(
                 pod -> (emptyOrNull(podNamePattern) || pod.getName().matches(podNamePattern))
                         && (emptyOrNull(tenantPattern) || pod.getTenantName().matches(tenantPattern)));
     }
@@ -139,11 +171,28 @@ public class PodsGridController implements Initializable {
         }
     }
 
-    private static boolean emptyOrNull(String str) {
-        return str == null || str.isEmpty();
+    public void refresh(ActionEvent actionEvent) {
+        observablePodList.setAll(queryPodsList());
     }
 
-    public void setStage(Stage stage) {
-        this.stage = stage;
+    public void showPodInfo(MouseEvent mouseEvent) {
+        if (mouseEvent.getClickCount() != 2) {
+            return;
+        }
+
+        PodInfo podInfo = tableView.getSelectionModel().getSelectedItem();
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setResizable(true);
+        dialog.setHeaderText(podInfo.getName());
+        TextArea textArea = new TextArea(podInfo.getV1Pod().toString());
+        textArea.setEditable(false);
+        dialog.getDialogPane().setContent(textArea);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+        dialog.show();
+    }
+
+    private static boolean emptyOrNull(String str) {
+        return str == null || str.isEmpty();
     }
 }

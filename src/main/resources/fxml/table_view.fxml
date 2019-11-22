@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
@@ -9,27 +10,34 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.2-internal"
             fx:controller="ru.usharik.k8s.client.controller.PodsGridController">
 
     <top>
-        <HBox>
-            <Label text="Pod name: "/>
-            <TextField fx:id="podNameFilter" prefWidth="-1.0"/>
-            <Label text="Tenant name: "/>
-            <TextField fx:id="tenantNameFilter" prefWidth="-1.0"/>
-            <Button fx:id="btApplyFilter" text="Apply" onAction="#applyFilter"/>
-        </HBox>
+        <GridPane hgap="8" vgap="8">
+            <padding>
+                <Insets top="8" right="8" bottom="8" left="8"/>
+            </padding>
+
+            <Label text="Service URL: " GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="serviceUrl" text="http://localhost:8888" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Button text="Refresh" onAction="#refresh" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+
+            <Label text="Pod name: " GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <TextField fx:id="podNameFilter" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+            <Label text="Tenant name: " GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+            <TextField fx:id="tenantNameFilter" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+            <Button text="Apply filter" onAction="#applyFilter" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+        </GridPane>
     </top>
 
     <center>
-        <Label style="-fx-font: NORMAL 20 Tahoma;" text="Pods list" GridPane.columnIndex="0" GridPane.rowIndex="0">
-        </Label>
-        <TableView fx:id="tableView" GridPane.columnIndex="0" GridPane.rowIndex="1">
+        <TableView fx:id="tableView" GridPane.columnIndex="0" GridPane.rowIndex="1" onMouseClicked="#showPodInfo">
             <contextMenu>
-                <ContextMenu fx:id="menu">
+                <ContextMenu>
                     <items>
                         <MenuItem text="Copy pod name" onAction="#copyPodName"/>
                         <MenuItem text="Copy tenant name" onAction="#copyTenantName"/>
@@ -39,11 +47,12 @@
             </contextMenu>
 
             <columns>
-                <TableColumn fx:id="name" prefWidth="300" text="Pod name"/>
+                <TableColumn fx:id="name" prefWidth="350" text="Pod name"/>
                 <TableColumn fx:id="tenantName" prefWidth="200" text="Tenant name"/>
                 <TableColumn fx:id="status" prefWidth="100" text="Status"/>
-                <TableColumn fx:id="startTime" prefWidth="200" text="Start time"/>
-                <TableColumn fx:id="minutesFromStart" prefWidth="100" text="Minutes From Start"/>
+                <TableColumn fx:id="restartCount" prefWidth="100" text="Restart count"/>
+                <TableColumn fx:id="startTime" prefWidth="230" text="Start time"/>
+                <TableColumn fx:id="minutesFromStart" prefWidth="130" text="Minutes From Start"/>
             </columns>
         </TableView>
     </center>

@@ -1,9 +1,5 @@
 package ru.usharik.k8s.client;
 
-import io.kubernetes.client.ApiClient;
-import io.kubernetes.client.Configuration;
-import io.kubernetes.client.apis.CoreV1Api;
-import io.kubernetes.client.util.Config;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,10 +13,10 @@ public class Main extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public final static CoreV1Api coreApi = initClient();
-
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("FXML TableView Example");
+        logger.info("Starting application");
+
+        primaryStage.setTitle("K8S Pods monitor");
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table_view.fxml"));
         Parent root = loader.load();
@@ -34,13 +30,5 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         launch(args);
-    }
-
-    private static CoreV1Api initClient() {
-        logger.info("Initializing Kubernetes client");
-
-        ApiClient client = Config.fromUrl("http://localhost:8888");
-        Configuration.setDefaultApiClient(client);
-        return new CoreV1Api(client);
     }
 }
