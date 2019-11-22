@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.2-internal"
+            fx:controller="ru.usharik.k8s.client.controller.PodsGridController">
+
+    <top>
+        <HBox>
+            <Label text="Pod name: "/>
+            <TextField fx:id="podNameFilter" prefWidth="-1.0"/>
+            <Label text="Tenant name: "/>
+            <TextField fx:id="tenantNameFilter" prefWidth="-1.0"/>
+            <Button fx:id="btApplyFilter" text="Apply" onAction="#applyFilter"/>
+        </HBox>
+    </top>
+
+    <center>
+        <Label style="-fx-font: NORMAL 20 Tahoma;" text="Pods list" GridPane.columnIndex="0" GridPane.rowIndex="0">
+        </Label>
+        <TableView fx:id="tableView" GridPane.columnIndex="0" GridPane.rowIndex="1">
+            <contextMenu>
+                <ContextMenu fx:id="menu">
+                    <items>
+                        <MenuItem text="Copy pod name" onAction="#copyPodName"/>
+                        <MenuItem text="Copy tenant name" onAction="#copyTenantName"/>
+                        <MenuItem text="Download logs" onAction="#downloadLogs"/>
+                    </items>
+                </ContextMenu>
+            </contextMenu>
+
+            <columns>
+                <TableColumn fx:id="name" prefWidth="300" text="Pod name"/>
+                <TableColumn fx:id="tenantName" prefWidth="200" text="Tenant name"/>
+                <TableColumn fx:id="status" prefWidth="100" text="Status"/>
+                <TableColumn fx:id="startTime" prefWidth="200" text="Start time"/>
+                <TableColumn fx:id="minutesFromStart" prefWidth="100" text="Minutes From Start"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <Pane/>
+    </bottom>
+</BorderPane>
