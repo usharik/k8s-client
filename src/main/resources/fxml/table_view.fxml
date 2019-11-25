@@ -7,10 +7,10 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.Pane?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.2-internal"
             fx:controller="ru.usharik.k8s.client.controller.PodsGridController">
 
@@ -58,6 +58,6 @@
     </center>
 
     <bottom>
-        <Pane/>
+        <TextArea fx:id="logsArea" editable="false"/>
     </bottom>
 </BorderPane>

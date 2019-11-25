@@ -29,6 +29,7 @@ import javafx.stage.Stage;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.usharik.k8s.client.logger.TextAreaAppender;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,6 +46,9 @@ public class PodsGridController implements Initializable {
 
     @FXML
     public TextField serviceUrl;
+
+    @FXML
+    public TextArea logsArea;
 
     @FXML
     private TextField podNameFilter;
@@ -75,7 +79,7 @@ public class PodsGridController implements Initializable {
 
     private FilteredList<PodInfo> filteredPodList;
 
-    private ObservableList<PodInfo> observablePodList;
+    private ObservableList<PodInfo> observablePodList = FXCollections.observableArrayList();
 
     private Stage stage;
 
@@ -87,7 +91,13 @@ public class PodsGridController implements Initializable {
         tenantName.setCellValueFactory(new PropertyValueFactory<>("tenantName"));
         minutesFromStart.setCellValueFactory(new PropertyValueFactory<>("minutesFromStart"));
 
-        observablePodList = FXCollections.observableArrayList(queryPodsList());
+        TextAreaAppender.setTextArea(logsArea);
+
+        try {
+            observablePodList = FXCollections.observableArrayList(queryPodsList());
+        } catch (Exception ex) {
+            // to prevent application close at startup
+        }
         filteredPodList = new FilteredList<>(observablePodList, p -> true);
         SortedList<PodInfo> sortedList = new SortedList<>(this.filteredPodList);
         sortedList.comparatorProperty().bind(tableView.comparatorProperty());
