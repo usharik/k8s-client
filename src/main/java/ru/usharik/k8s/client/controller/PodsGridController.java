@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -44,11 +45,17 @@ public class PodsGridController implements Initializable {
 
     private static final Logger logger = LoggerFactory.getLogger(PodsGridController.class);
 
-    @FXML
-    public TextField serviceUrl;
+    private static final String K8S_SERVICE_URL="K8S Service URL";
+    private static final String K8S_CONFIG_FILE_PATH ="K8S config file path";
 
     @FXML
-    public TextArea logsArea;
+    private TextField serviceUrl;
+
+    @FXML
+    private TextArea logsArea;
+
+    @FXML
+    private ComboBox<String> cbType;
 
     @FXML
     private TextField podNameFilter;
@@ -75,7 +82,7 @@ public class PodsGridController implements Initializable {
     private TableColumn<PodInfo, DateTime> startTime;
 
     @FXML
-    public TableColumn<PodInfo, Integer> minutesFromStart;
+    private TableColumn<PodInfo, Integer> minutesFromStart;
 
     private FilteredList<PodInfo> filteredPodList;
 
@@ -90,6 +97,8 @@ public class PodsGridController implements Initializable {
         startTime.setCellValueFactory(new PropertyValueFactory<>("startTime"));
         tenantName.setCellValueFactory(new PropertyValueFactory<>("tenantName"));
         minutesFromStart.setCellValueFactory(new PropertyValueFactory<>("minutesFromStart"));
+
+        cbType.getSelectionModel().selectFirst();
 
         TextAreaAppender.setTextArea(logsArea);
 
@@ -112,7 +121,17 @@ public class PodsGridController implements Initializable {
         try {
             logger.info("Getting pods list from service {}", serviceUrl.getText());
 
-            ApiClient client = Config.fromUrl(serviceUrl.getText());
+            ApiClient client = Config.defaultClient();
+            switch (cbType.getSelectionModel().getSelectedItem()) {
+                case K8S_SERVICE_URL:
+                    logger.info("Starting client based on K8S service URL");
+                    client = Config.fromUrl(serviceUrl.getText());
+                    break;
+                case K8S_CONFIG_FILE_PATH:
+                    logger.info("Starting client based on K8S config file");
+                    client = Config.fromConfig(serviceUrl.getText());
+                    break;
+            }
             Configuration.setDefaultApiClient(client);
             return new CoreV1Api(client)
                     .listNamespacedPod("default", "false", null, null, null, null, null, null, null)
@@ -204,5 +223,13 @@ public class PodsGridController implements Initializable {
 
     private static boolean emptyOrNull(String str) {
         return str == null || str.isEmpty();
+    }
+
+    public void choiceConfigFile(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            serviceUrl.setText(file.toString());
+        }
     }
 }

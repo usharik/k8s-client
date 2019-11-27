@@ -11,6 +11,9 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.2-internal"
             fx:controller="ru.usharik.k8s.client.controller.PodsGridController">
 
@@ -20,9 +23,17 @@
                 <Insets top="8" right="8" bottom="8" left="8"/>
             </padding>
 
-            <Label text="Service URL: " GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-            <TextField fx:id="serviceUrl" text="http://localhost:8888" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-            <Button text="Refresh" onAction="#refresh" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            <ComboBox fx:id="cbType" GridPane.columnIndex="0" GridPane.rowIndex="0" >
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="K8S Service URL" />
+                        <String fx:value="K8S config file path" />
+                    </FXCollections>
+                </items>
+            </ComboBox>
+            <TextField fx:id="serviceUrl" text="http://localhost:8888" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="0"/>
+            <Button text="Choice config file" onAction="#choiceConfigFile" GridPane.columnIndex="4" GridPane.rowIndex="0" />
+            <Button text="Refresh" onAction="#refresh" GridPane.columnIndex="5" GridPane.rowIndex="0"/>
 
             <Label text="Pod name: " GridPane.columnIndex="0" GridPane.rowIndex="1"/>
             <TextField fx:id="podNameFilter" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
