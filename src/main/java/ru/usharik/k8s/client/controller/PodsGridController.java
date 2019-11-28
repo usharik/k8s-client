@@ -45,8 +45,8 @@ public class PodsGridController implements Initializable {
 
     private static final Logger logger = LoggerFactory.getLogger(PodsGridController.class);
 
-    private static final String K8S_SERVICE_URL="K8S Service URL";
-    private static final String K8S_CONFIG_FILE_PATH ="K8S config file path";
+    public static final String K8S_SERVICE_URL="K8S Service URL";
+    public static final String K8S_CONFIG_FILE_PATH ="K8S config file path";
 
     @FXML
     private TextField serviceUrl;

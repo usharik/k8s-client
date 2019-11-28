@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.collections.FXCollections?>
-<?import java.lang.String?>
+<?import ru.usharik.k8s.client.controller.PodsGridController?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.2-internal"
             fx:controller="ru.usharik.k8s.client.controller.PodsGridController">
 
@@ -26,8 +26,8 @@
             <ComboBox fx:id="cbType" GridPane.columnIndex="0" GridPane.rowIndex="0" >
                 <items>
                     <FXCollections fx:factory="observableArrayList">
-                        <String fx:value="K8S Service URL" />
-                        <String fx:value="K8S config file path" />
+                        <PodsGridController fx:constant="K8S_SERVICE_URL" />
+                        <PodsGridController fx:constant="K8S_CONFIG_FILE_PATH" />
                     </FXCollections>
                 </items>
             </ComboBox>
