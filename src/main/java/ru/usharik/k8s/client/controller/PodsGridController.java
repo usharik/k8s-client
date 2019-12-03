@@ -17,6 +17,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -32,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.usharik.k8s.client.logger.TextAreaAppender;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -189,6 +192,14 @@ public class PodsGridController implements Initializable {
                 InputStream is = logs.streamNamespacedPodLog(podInfo.getV1Pod());
 
                 ByteStreams.copy(is, os);
+                logger.info("Log is saved to file: {}", file);
+                if (Desktop.isDesktopSupported()) {
+                    Desktop desktop = Desktop.getDesktop();
+                    desktop.open(file);
+                }
+                else {
+                    logger.error("Desktop is not supported");
+                }
             } catch (Exception e) {
                 logger.error("", e);
 
@@ -214,9 +225,22 @@ public class PodsGridController implements Initializable {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setResizable(true);
         dialog.setHeaderText(podInfo.getName());
+
+        TabPane tabPane = new TabPane();
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+
         TextArea textArea = new TextArea(podInfo.getV1Pod().toString());
         textArea.setEditable(false);
-        dialog.getDialogPane().setContent(textArea);
+        Tab tab1 = new Tab("All info", textArea);
+
+        textArea = new TextArea(podInfo.getV1Pod().getStatus().toString());
+        textArea.setEditable(false);
+        Tab tab2 = new Tab("Status"  , textArea);
+
+        tabPane.getTabs().add(tab1);
+        tabPane.getTabs().add(tab2);
+
+        dialog.getDialogPane().setContent(tabPane);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
         dialog.show();
     }
